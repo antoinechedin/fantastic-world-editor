@@ -18,6 +18,9 @@ class FantasticWorldEditor {
 	public function __construct() {
 		add_action( 'init', array( $this, 'customPostLocationRegister' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'publicEnqueue' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'adminEnqueue' ) );
+
+		add_action( 'admin_menu', array( $this, 'addAdminMenu' ) );
 
 		add_filter( 'style_loader_tag', array( $this, 'addStyleAttributes' ), 10, 2 );
 		add_filter( 'script_loader_tag', array( $this, 'addScriptAttributes' ), 10, 3 );
@@ -45,8 +48,28 @@ class FantasticWorldEditor {
 	}
 
 	public function publicEnqueue() {
-		wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.8.0/dist/leaflet.css', array(), null);
+		wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.8.0/dist/leaflet.css', array(), null );
 		wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.8.0/dist/leaflet.js', array(), null );
+		wp_enqueue_script( 'fantastic-world-editor', plugins_url( 'public/js/fantastic-world-editor.js', __FILE__ ), array(), null );
+	}
+
+	public function adminEnqueue() {
+		$this->publicEnqueue();
+	}
+
+	public function addAdminMenu() {
+		add_menu_page( 'World Map Editor', 'World Map', 'manage_options', 'fme-world-map', array(
+			$this,
+			'worldMapMenuHTML'
+		) );
+	}
+
+	public function worldMapMenuHTML() {
+		?>
+        <h1>World Map Title</h1>
+        <div id="worldMap" style="height: 500px;"></div>
+        <script>FWE.createDebugMap("worldMap");</script>
+		<?php
 	}
 
 	public function addStyleAttributes( $html, $handle ) {
