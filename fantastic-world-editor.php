@@ -20,6 +20,7 @@ class FantasticWorldEditor {
 		add_action( 'wp_enqueue_scripts', array( $this, 'publicEnqueue' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'adminEnqueue' ) );
 
+		add_action( 'admin_init', array( $this, 'initFWEOptions' ) );
 		add_action( 'admin_menu', array( $this, 'addAdminMenu' ) );
 
 		add_filter( 'style_loader_tag', array( $this, 'addStyleAttributes' ), 10, 2 );
@@ -58,18 +59,60 @@ class FantasticWorldEditor {
 	}
 
 	public function addAdminMenu() {
-		add_menu_page( 'World Map Editor', 'World Map', 'manage_options', 'fme-world-map', array(
+		add_menu_page( 'World Map', 'World Map', 'manage_options', 'fwe-world-map', array(
 			$this,
 			'worldMapMenuHTML'
 		) );
+
+		add_options_page(
+			'Fantastic World Editor',
+			'Fantastic World Editor',
+			'manage_options',
+			'fwe-options',
+			array( $this, 'fweOptionsHTML' )
+		);
+	}
+
+	function initFWEOptions() {
+		register_setting( 'fwe-options', 'fwe-map-url' );
+
+		add_settings_section(
+			'fwe-options',
+			null,
+			null,
+			'fwe-options'
+		);
+
+		add_settings_field(
+			'fwe-map-url-field',
+			'Map URL', array( $this, 'fweSetting_field_callback' ),
+			'fwe-options',
+			'fwe-options'
+		);
+	}
+
+	function fweSetting_field_callback() {
+		$setting = get_option( 'fwe-map-url' );
+		?>
+        <input type="text" name="fwe-map-url" class="regular-text"
+               value="<?php echo isset( $setting ) ? esc_attr( $setting ) : ''; ?>"/>
+        <input type="button" id="fwe-test-map-url" class="button" value="Test"/>
+        <p>
+        <div id="test-map" style="max-width: 500px; height: 100px; background-color: lightgray"></div>
+        </p>
+		<?php
 	}
 
 	public function worldMapMenuHTML() {
 		?>
         <h1>World Map Title</h1>
-        <div id="worldMap" style="height: 500px;"></div>
-        <script>FWE.createDebugMap("worldMap");</script>
+        <div id="worldMap" style="height: 700px;"></div>
+        <script>FWE.createMap("worldMap");</script>
 		<?php
+	}
+
+	public function fweOptionsHTML() {
+		require_once "admin/partials/fwe-options.php";
 	}
 
 	public function addStyleAttributes( $html, $handle ) {
