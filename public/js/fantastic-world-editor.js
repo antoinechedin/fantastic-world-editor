@@ -12,6 +12,19 @@ class FWE {
         return map;
     }
 
+    static createTestMap(divId, url) {
+        let map = L.map(divId, {
+            minZoom: 0,
+            maxZoom: 4
+        });
+        L.tileLayer(url, {
+            attribution: "Vacarme"
+        }).addTo(map);
+
+        map.setView([0, 0], 2);
+        return map;
+    }
+
     static createDebugMap(divId) {
         let map = L.map(divId).setView([51.505, -0.09], 13);
 

@@ -84,21 +84,22 @@ class FantasticWorldEditor {
 		);
 
 		add_settings_field(
-			'fwe-map-url-field',
-			'Map URL', array( $this, 'fweSetting_field_callback' ),
+			'fwe-map-url',
+			'Map URL',
+			array( $this, 'textWithMapFieldHTML' ),
 			'fwe-options',
 			'fwe-options'
 		);
 	}
 
-	function fweSetting_field_callback() {
-		$setting = get_option( 'fwe-map-url' );
+	function textWithMapFieldHTML() {
+		$options = get_option( 'fwe-map-url' );
 		?>
-        <input type="text" name="fwe-map-url" class="regular-text"
-               value="<?php echo isset( $setting ) ? esc_attr( $setting ) : ''; ?>"/>
-        <input type="button" id="fwe-test-map-url" class="button" value="Test"/>
+        <input type="text" id="fwe-map-url" name="fwe-map-url"
+               value="<?php echo isset( $options ) ? esc_attr( $options ) : ''; ?>" class="regular-text"/>
+        <input type="button" id="fwe-test-map-url" class="button" value="Test" onclick="testMapUrl()"/>
         <p>
-        <div id="test-map" style="max-width: 500px; height: 100px; background-color: lightgray"></div>
+        <div id="test-map-container" style="max-width: 500px; height: 200px; background-color: lightgray"></div>
         </p>
 		<?php
 	}
