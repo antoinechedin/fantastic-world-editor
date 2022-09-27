@@ -4,7 +4,7 @@ class FWE {
             minZoom: 0,
             maxZoom: 4
         });
-        L.tileLayer("http://localhost/wp-content/uploads/2022/08/map-{z}-{y}-{x}.png", {
+        L.tileLayer(FWE_DATA.mapUrl, {
             attribution: "Vacarme"
         }).addTo(map);
 
