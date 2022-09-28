@@ -1,0 +1,12 @@
+th#marker-icon {
+    width: 50px;
+}
+
+td.marker-icon.column-marker-icon img {
+    max-width: 100%;
+    height: auto;
+}
+
+.wp-list-table tr:not(.inline-edit-row):not(.no-items) td.marker-icon.column-marker-icon::before {
+    display: none;
+}
