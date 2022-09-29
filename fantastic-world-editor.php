@@ -90,6 +90,13 @@ class FantasticWorldEditor {
 		);
 
 		add_meta_box(
+			'fwe-location-map-settings',
+			'Map settings',
+			array( $this, 'locationMapSettingsMetaBoxHTML' ),
+			'fwe-location'
+		);
+
+		add_meta_box(
 			'fwe-marker-settings',
 			'Settings',
 			array( $this, 'markerSettingsMetaBoxHTML' ),
@@ -119,6 +126,29 @@ class FantasticWorldEditor {
 		}
 	}
 
+	public function locationMapSettingsMetaBoxHTML( $post ) {
+		?>
+        <div id="map" style="height:400px;"></div>
+        <script>
+            let locationGeoJsonString = "<?php echo esc_js( get_post_meta( $post->ID, 'fwe-geo-json', true ) ) ?>";
+            let locationGeoJson = {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [0.0, 0.0]},
+                "properties": {}
+            };
+            try {
+                locationGeoJson = JSON.parse(locationGeoJsonString);
+            } catch (e) {
+                console.error("geo JSON string retrieved isn't a valid JSON " + locationGeoJsonString);
+            }
+
+            let map = FWE.createMap("map");
+            L.
+
+        </script>
+		<?php
+	}
+
 	function customPostLocationMetaBoxHTML( $post ) {
 		$geoJson = get_post_meta( $post->ID, 'fwe-geo-json', true );
 		?><label class="screen-reader-text" for="fwe-geo-json">Geo JSON</label>
@@ -144,14 +174,14 @@ class FantasticWorldEditor {
 		if ( empty( $iconAnchorY ) ) {
 			$iconAnchorY = '0.5';
 		}
-		$popupAnchorX = get_post_meta( $post->ID, 'fwe-marker-popup-anchor-x', true );
+		/*$popupAnchorX = get_post_meta( $post->ID, 'fwe-marker-popup-anchor-x', true );
 		if ( empty( $popupAnchorX ) ) {
 			$popupAnchorX = '0.5';
 		}
 		$popupAnchorY = get_post_meta( $post->ID, 'fwe-marker-popup-anchor-y', true );
 		if ( empty( $popupAnchorY ) ) {
 			$popupAnchorY = '0.5';
-		}
+		}*/
 
 		?>
         <p><label for="fwe-marker-icon-size-x">Icon size X</label>
@@ -185,19 +215,19 @@ class FantasticWorldEditor {
                    value="<?php echo esc_attr( $iconAnchorY ) ?>">
         </p>
 
-        <p><label for="fwe-marker-popup-anchor-x">Popup anchor X</label>
+        <!--<p><label for="fwe-marker-popup-anchor-x">Popup anchor X</label>
             <input name="fwe-marker-popup-anchor-x" id="fwe-marker-popup-anchor-x" class="slider" type="range" min="0"
-                   max="1" step="0.01" value="<?php echo esc_attr( $popupAnchorX ) ?>">
+                   max="1" step="0.01" value="<?php /*echo esc_attr( $popupAnchorX ) */ ?>">
             <input id="fwe-marker-popup-anchor-x-num" type="number" min="0" max="1" step="0.01"
-                   value="<?php echo esc_attr( $popupAnchorX ) ?>">
+                   value="<?php /*echo esc_attr( $popupAnchorX ) */ ?>">
         </p>
         <p><label for="fwe-marker-popup-anchor-y">Popup anchor Y</label>
             <input name="fwe-marker-popup-anchor-y" id="fwe-marker-popup-anchor-y" class="slider" type="range" min="0"
-                   max="1" step="0.01" value="<?php echo esc_attr( $popupAnchorY ) ?>">
+                   max="1" step="0.01" value="<?php /*echo esc_attr( $popupAnchorY ) */ ?>">
             <input id="fwe-marker-popup-anchor-y-num" type="number" min="0" max="1" step="0.01"
-                   value="<?php echo esc_attr( $popupAnchorY ) ?>">
-        </p>
-        <div id="marker-map" style="height: 200px;"></div>
+                   value="<?php /*echo esc_attr( $popupAnchorY ) */ ?>">
+        </p>-->
+        <div id="marker-map" style="height: 300px;"></div>
 
         <script>
             let sliderInput = document.getElementById("fwe-marker-icon-size-x");
@@ -206,14 +236,14 @@ class FantasticWorldEditor {
             var iconData = {
                 iconUrl: "<?php echo has_post_thumbnail( $post->ID ) ? esc_url( get_the_post_thumbnail_url( $post->ID ) ) : 'null' ?>",
                 iconSize: [<?php echo $iconSizeX . ', ' . $iconSizeY ?>],
-                iconAnchor: [32, 32],
-                popupAnchor: [32, 32],
+                iconAnchor: [<?php echo $iconSizeX * $iconAnchorX . ', ' . $iconSizeY * $iconAnchorY?>],
+                popupAnchor: [0, 0],
             };
 
             function updateMarkerSizeX(value, noUpdate = false) {
                 iconData.iconSize[0] = parseInt(value);
                 iconData.iconAnchor[0] = Math.round(iconData.iconSize[0] * document.getElementById("fwe-marker-icon-anchor-x").value);
-                iconData.popupAnchor[0] = Math.round(iconData.iconSize[0] * document.getElementById("fwe-marker-popup-anchor-x").value);
+                // iconData.popupAnchor[0] = Math.round(iconData.iconSize[0] * document.getElementById("fwe-marker-popup-anchor-x").value);
                 document.getElementById("fwe-marker-icon-size-x").value = value;
                 document.getElementById("fwe-marker-icon-size-x-num").value = value;
 
@@ -229,7 +259,7 @@ class FantasticWorldEditor {
             function updateMarkerSizeY(value, noUpdate = false) {
                 iconData.iconSize[1] = parseInt(value);
                 iconData.iconAnchor[1] = Math.round(iconData.iconSize[1] * document.getElementById("fwe-marker-icon-anchor-y").value);
-                iconData.popupAnchor[1] = Math.round(iconData.iconSize[1] * document.getElementById("fwe-marker-popup-anchor-y").value);
+                // iconData.popupAnchor[1] = Math.round(iconData.iconSize[1] * document.getElementById("fwe-marker-popup-anchor-y").value);
                 document.getElementById("fwe-marker-icon-size-y").value = value;
                 document.getElementById("fwe-marker-icon-size-y-num").value = value;
 
@@ -256,7 +286,7 @@ class FantasticWorldEditor {
                 updateMarker();
             }
 
-            function updatePopupAnchorX(value) {
+            /*function updatePopupAnchorX(value) {
                 iconData.popupAnchor[0] = Math.round(iconData.iconSize[0] * parseFloat(value));
                 document.getElementById("fwe-marker-popup-anchor-x").value = value;
                 document.getElementById("fwe-marker-popup-anchor-x-num").value = value;
@@ -268,7 +298,7 @@ class FantasticWorldEditor {
                 document.getElementById("fwe-marker-popup-anchor-y").value = value;
                 document.getElementById("fwe-marker-popup-anchor-y-num").value = value;
                 updateMarker();
-            }
+            }*/
 
             let markerMap = FWE.createMap("marker-map");
 
@@ -277,8 +307,8 @@ class FantasticWorldEditor {
                 {id: "fwe-marker-icon-size-y", callback: updateMarkerSizeY},
                 {id: "fwe-marker-icon-anchor-x", callback: updateMarkerAnchorX},
                 {id: "fwe-marker-icon-anchor-y", callback: updateMarkerAnchorY},
-                {id: "fwe-marker-popup-anchor-x", callback: updatePopupAnchorX},
-                {id: "fwe-marker-popup-anchor-y", callback: updatePopupAnchorY},
+                /*{id: "fwe-marker-popup-anchor-x", callback: updatePopupAnchorX},
+                {id: "fwe-marker-popup-anchor-y", callback: updatePopupAnchorY},*/
             ];
 
             idCallbacks.forEach(function (idCallback) {

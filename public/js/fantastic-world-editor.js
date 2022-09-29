@@ -2,7 +2,10 @@ class FWE {
     static createMap(divId) {
         let map = L.map(divId, {
             minZoom: 0,
-            maxZoom: 4
+            maxZoom: 4,
+            zoomSnap: 0,
+            zoomDelta: 0.5,
+            wheelPxPerZoomLevel: 120,
         });
         L.tileLayer(FWE_DATA.mapUrl, {
             attribution: "Vacarme"
@@ -15,7 +18,10 @@ class FWE {
     static createTestMap(divId, url) {
         let map = L.map(divId, {
             minZoom: 0,
-            maxZoom: 4
+            maxZoom: 4,
+            zoomSnap: 0,
+            zoomDelta: 0.5,
+            wheelPxPerZoomLevel: 120,
         });
         L.tileLayer(url, {
             attribution: "Vacarme"

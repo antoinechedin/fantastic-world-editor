@@ -21,7 +21,6 @@ settings_errors( "wporg_messages" );
     let testMap = FWE.createTestMap("test-map-container", mapUrlField.value);
 
     function testMapUrl() {
-        console.log(mapUrlField);
         if (testMap !== null) {
             testMap.off();
             testMap.remove();
