@@ -1,5 +1,23 @@
-class FWE {
-    static createMap(divId) {
+class FantasticWorldEditor {
+
+    constructor(obj) {
+        this.mapUrl = obj.mapUrl;
+        this.mapOption = {
+            minZoom: 0,
+            maxZoom: 4,
+            zoomSnap: 0,
+            zoomDelta: 0.5,
+            wheelPxPerZoomLevel: 120,
+        };
+        this.icons = {};
+
+        for (const [key, iconOptions] of Object.entries(obj.iconsOptions)) {
+            this.icons[key] = L.icon(iconOptions);
+        }
+    }
+
+
+    createMap(divId) {
         let map = L.map(divId, {
             minZoom: 0,
             maxZoom: 4,
@@ -15,7 +33,7 @@ class FWE {
         return map;
     }
 
-    static createTestMap(divId, url) {
+    createTestMap(divId, url) {
         let map = L.map(divId, {
             minZoom: 0,
             maxZoom: 4,
@@ -31,7 +49,7 @@ class FWE {
         return map;
     }
 
-    static createDebugMap(divId) {
+    createDebugMap(divId) {
         let map = L.map(divId).setView([51.505, -0.09], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -45,3 +63,5 @@ class FWE {
         return map;
     }
 }
+
+const FWE = Object.freeze(new FantasticWorldEditor(FWE_DATA));

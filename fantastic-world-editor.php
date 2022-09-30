@@ -58,6 +58,9 @@ class FantasticWorldEditor {
 					'revision',
 					'excerpt'
 				),
+				'rewrite' => array(
+					'slug' => 'location'
+				)
 			)
 		);
 	}
@@ -130,21 +133,71 @@ class FantasticWorldEditor {
 		?>
         <div id="map" style="height:400px;"></div>
         <script>
-            let locationGeoJsonString = "<?php echo esc_js( get_post_meta( $post->ID, 'fwe-geo-json', true ) ) ?>";
-            let locationGeoJson = {
+            var currentMarker;
+            var locationFeature = {
                 "type": "Feature",
                 "geometry": {"type": "Point", "coordinates": [0.0, 0.0]},
                 "properties": {}
             };
-            try {
-                locationGeoJson = JSON.parse(locationGeoJsonString);
-            } catch (e) {
-                console.error("geo JSON string retrieved isn't a valid JSON " + locationGeoJsonString);
+            var geoJsonInputField;
+
+            function onMarkerDragEnd(e) {
+                locationFeature.geometry.coordinates = L.GeoJSON.latLngToCoords(e.target.getLatLng());
+                updateGeoJsonInputField();
             }
 
-            let map = FWE.createMap("map");
-            L.
+            function updateGeoJsonInputField() {
+                geoJsonInputField.value = JSON.stringify(locationFeature);
+            }
 
+            jQuery(document).ready(function () {
+                geoJsonInputField = jQuery("textarea#fwe-geo-json")[0];
+
+                let locationGeoJson = <?php echo json_encode( get_post_meta( $post->ID, 'fwe-geo-json', true ) ) ?>;
+                try {
+                    locationFeature = JSON.parse(locationGeoJson);
+                } catch (e) {
+                    console.error("geo JSON string retrieved isn't a valid JSON " + locationGeoJson);
+                }
+
+                let map = FWE.createMap("map");
+                currentMarker = L.geoJSON(locationFeature, {
+                    pointToLayer: function (feature, latLng) {
+                        return L.marker(latLng, {
+                            title: locationFeature.geometry.coordinates.toString(),
+                            draggable: true,
+                            icon: FWE.icons[locationFeature.properties.iconID]
+                        }).on("dragend", onMarkerDragEnd);
+                    }
+                });
+
+                currentMarker
+                    .addTo(map);
+
+                var customControl = L.Control.extend({
+                    options: {
+                        position: 'bottomleft'
+                    },
+
+                    onAdd: function (map) {
+                        var container = L.DomUtil.create('select', 'leaflet-bar leaflet-control leaflet-control-custom');
+
+/*                        container.style.backgroundColor = 'white';
+                        container.style.backgroundImage = "url(http://t1.gstatic.com/images?q=tbn:ANd9GcR6FCUMW5bPn8C4PbKak2BJQQsmC-K9-mbYBeFZm1ZM2w2GRy40Ew)";
+                        container.style.backgroundSize = "30px 30px";
+                        container.style.width = '30px';
+                        container.style.height = '30px';*/
+
+                        container.onclick = function () {
+                            console.log('buttonClicked');
+                        }
+
+                        return container;
+                    }
+                });
+
+                map.addControl(new customControl());
+            });
         </script>
 		<?php
 	}
@@ -339,10 +392,44 @@ class FantasticWorldEditor {
 		wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.8.0/dist/leaflet.css', array(), null );
 		wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.8.0/dist/leaflet.js', array(), null );
 		wp_enqueue_script( 'fantastic-world-editor', plugins_url( 'public/js/fantastic-world-editor.js', __FILE__ ), array(), null );
+
+		$markers     = get_posts( array(
+			'post_type'   => 'fwe-marker',
+			'numberposts' => - 1,
+		) );
+		$iconsOptions = array();
+		foreach ( $markers as $marker ) {
+			$iconOption = $this->getIconOptionsFrom( $marker->ID );
+			if ( ! is_null( $iconOption ) ) {
+				$iconsOptions[ $marker->ID ] = $iconOption;
+			}
+		}
+
 		wp_add_inline_script( 'fantastic-world-editor',
 			'const FWE_DATA = ' . json_encode( array(
-				'mapUrl' => get_option( 'fwe-map-url' )
+				'mapUrl'      => get_option( 'fwe-map-url' ),
+				'iconsOptions' => $iconsOptions
 			) ), 'before' );
+	}
+
+	private function getIconOptionsFrom( $markerID ) {
+		$markerMeta = get_post_meta( $markerID );
+
+		if ( has_post_thumbnail( $markerID ) ) {
+			return array(
+				'iconUrl'    => get_the_post_thumbnail_url( $markerID ),
+				'iconSize'   => array(
+					floatval( $markerMeta['fwe-marker-icon-size-x'][0] ),
+					floatval( $markerMeta['fwe-marker-icon-size-y'][0] ),
+				),
+				'iconAnchor' => array(
+					floatval( $markerMeta['fwe-marker-icon-anchor-x'][0] ),
+					floatval( $markerMeta['fwe-marker-icon-anchor-y'][0] ),
+				)
+			);
+		}
+
+		return null;
 	}
 
 	public function adminEnqueue() {
@@ -422,7 +509,7 @@ class FantasticWorldEditor {
                     action: "getAllLocationGeoJson"
                 };
                 // #FIXME: Maybe find another way to send geoJSON features as strings so we don't have to do a double JSON.parse()
-                $.post(ajaxurl, data, function (response) {
+                jQuery.post(ajaxurl, data, function (response) {
                     let geoJsonFeatures = JSON.parse(response)
                     geoJsonFeatures.forEach(function (geoJsonFeatureString, i) {
                         geoJsonFeatures[i] = JSON.parse(geoJsonFeatureString);
