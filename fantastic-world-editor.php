@@ -182,11 +182,11 @@ class FantasticWorldEditor {
                     onAdd: function (map) {
                         var container = L.DomUtil.create('select', 'leaflet-bar leaflet-control leaflet-control-custom');
 
-/*                        container.style.backgroundColor = 'white';
-                        container.style.backgroundImage = "url(http://t1.gstatic.com/images?q=tbn:ANd9GcR6FCUMW5bPn8C4PbKak2BJQQsmC-K9-mbYBeFZm1ZM2w2GRy40Ew)";
-                        container.style.backgroundSize = "30px 30px";
-                        container.style.width = '30px';
-                        container.style.height = '30px';*/
+                        /*                        container.style.backgroundColor = 'white';
+												container.style.backgroundImage = "url(http://t1.gstatic.com/images?q=tbn:ANd9GcR6FCUMW5bPn8C4PbKak2BJQQsmC-K9-mbYBeFZm1ZM2w2GRy40Ew)";
+												container.style.backgroundSize = "30px 30px";
+												container.style.width = '30px';
+												container.style.height = '30px';*/
 
                         container.onclick = function () {
                             console.log('buttonClicked');
@@ -238,35 +238,41 @@ class FantasticWorldEditor {
 
 		?>
         <p><label for="fwe-marker-icon-size-x">Icon size X</label>
-            <input name="fwe-marker-icon-size-x" id="fwe-marker-icon-size-x" class="slider" type="range" min="16"
-                   max="128" step="1"
-                   value="<?php echo esc_attr( $iconSizeX ) ?>">
-            <input id="fwe-marker-icon-size-x-num" type="number" min="16" max="128" step="1"
-                   value="<?php echo esc_attr( $iconSizeX ) ?>">
+            <input id="fwe-marker-icon-size-x" class="slider" type="range" min="16" max="128" step="1">
+            <input id="fwe-marker-icon-size-x-num" type="number" min="16" max="128" step="1">
         </p>
         <p><label for="fwe-marker-icon-size-y">Icon size Y</label>
-            <input name="fwe-marker-icon-size-y" id="fwe-marker-icon-size-y" class="slider" type="range" min="16"
-                   max="128" step="1"
-                   value="<?php echo esc_attr( $iconSizeY ) ?>">
-            <input id="fwe-marker-icon-size-y-num" type="number" min="16" max="128" step="1"
-                   value="<?php echo esc_attr( $iconSizeY ) ?>">
+            <input id="fwe-marker-icon-size-y" class="slider" type="range" min="16" max="128" step="1">
+            <input id="fwe-marker-icon-size-y-num" type="number" min="16" max="128" step="1">
         </p>
-        <label for="fwe-marker-square-ratio">Square icon</label> <input id="fwe-marker-square-ratio" type="checkbox"
-			<?php checked( $iconSizeX, $iconSizeY, true ) ?> >
+        <label for="fwe-marker-square-ratio">Square icon</label> <input id="fwe-marker-square-ratio" type="checkbox">
         <p><label for="fwe-marker-icon-anchor-x">Icon anchor X</label>
-            <input name="fwe-marker-icon-anchor-x" id="fwe-marker-icon-anchor-x" class="slider" type="range" min="0"
-                   max="1" step="0.01"
-                   value="<?php echo esc_attr( $iconAnchorX ) ?>">
-            <input id="fwe-marker-icon-anchor-x-num" type="number" min="0" max="1" step="0.01"
-                   value="<?php echo esc_attr( $iconAnchorX ) ?>">
+            <input id="fwe-marker-icon-anchor-x" class="slider" type="range" min="0" max="1" step="0.01">
+            <input id="fwe-marker-icon-anchor-x-num" type="number" min="0" max="1" step="0.01">
         </p>
         <p><label for="fwe-marker-icon-anchor-y">Icon anchor Y</label>
-            <input name="fwe-marker-icon-anchor-y" id="fwe-marker-icon-anchor-y" class="slider" type="range" min="0"
-                   max="1" step="0.01"
-                   value="<?php echo esc_attr( $iconAnchorY ) ?>">
-            <input id="fwe-marker-icon-anchor-y-num" type="number" min="0" max="1" step="0.01"
-                   value="<?php echo esc_attr( $iconAnchorY ) ?>">
+            <input id="fwe-marker-icon-anchor-y" class="slider" type="range" min="0" max="1" step="0.01">
+            <input id="fwe-marker-icon-anchor-y-num" type="number" min="0" max="1" step="0.01">
         </p>
+        <p>
+            <input id="excerpt" name="excerpt" type="text">
+        </p>
+
+		<?php $image_id = '497';
+		if ( intval( $image_id ) > 0 ) {
+			// Change with the image size you want to use
+			$image = wp_get_attachment_image( $image_id, 'medium', false, array( 'id' => 'myprefix-preview-image' ) );
+		} else {
+			// Some default image
+			$image = '<img id="myprefix-preview-image" src="https://some.default.image.jpg" />';
+		}
+
+		echo $image; ?>
+        <input type="" name="myprefix_image_id" id="myprefix_image_id"
+               value="<?php echo esc_attr( $image_id ); ?>" class="regular-text"/>
+        <input type='button' class="button-primary" value="<?php esc_attr_e( 'Select a image', 'mytextdomain' ); ?>"
+               id="myprefix_media_manager"/>
+
 
         <!--<p><label for="fwe-marker-popup-anchor-x">Popup anchor X</label>
             <input name="fwe-marker-popup-anchor-x" id="fwe-marker-popup-anchor-x" class="slider" type="range" min="0"
@@ -283,22 +289,77 @@ class FantasticWorldEditor {
         <div id="marker-map" style="height: 300px;"></div>
 
         <script>
-            let sliderInput = document.getElementById("fwe-marker-icon-size-x");
-            let numInput = document.getElementById("fwe-marker-icon-size-x-num");
+            jQuery("input#myprefix_media_manager").click(function (e) {
+                e.preventDefault();
+                var image_frame;
+                if (image_frame) {
+                    image_frame.open();
+                }
+                // Define image_frame as wp.media object
+                image_frame = wp.media({
+                    title: "Select Media",
+                    multiple: false,
+                    library: {
+                        type: "image",
+                    }
+                });
 
-            var iconData = {
-                iconUrl: "<?php echo has_post_thumbnail( $post->ID ) ? esc_url( get_the_post_thumbnail_url( $post->ID ) ) : 'null' ?>",
-                iconSize: [<?php echo $iconSizeX . ', ' . $iconSizeY ?>],
-                iconAnchor: [<?php echo $iconSizeX * $iconAnchorX . ', ' . $iconSizeY * $iconAnchorY?>],
-                popupAnchor: [0, 0],
-            };
+                image_frame.on("select", function () {
+                    // On close, get selections and save to the hidden input
+                    // plus other AJAX stuff to refresh the image preview
+                    var selection = image_frame.state().get("selection");
+                    var gallery_ids = new Array();
+                    var my_index = 0;
+                    jQuery("input#myprefix_image_id").val(selection.first().id);
+                    Refresh_Image(selection.first());
+                });
+
+                image_frame.on("open", function () {
+                    // On open, get the id from the hidden input
+                    // and select the appropiate images in the media manager
+                    var selection = image_frame.state().get('selection');
+                    var ids = jQuery("input#myprefix_image_id").val().split(',');
+                    ids.forEach(function (id) {
+                        var attachment = wp.media.attachment(id);
+                        attachment.fetch();
+                        selection.add(attachment ? [attachment] : []);
+                    });
+
+                });
+
+                image_frame.open();
+            });
+
+            // Ajax request to refresh the image preview
+            function Refresh_Image(attachement) {
+                jQuery('#myprefix-preview-image').attr("src", attachement.attributes.sizes.full.url);
+            }
+
+
+            const iconData = <?php echo json_encode( get_the_excerpt( $post ) ) ?>;
+            iconData.iconUrl = "<?php echo has_post_thumbnail( $post->ID ) ? esc_url( get_the_post_thumbnail_url( $post->ID ) ) : 'null' ?>";
+
+            //var iconData = {
+            //    iconUrl: "<?php //echo has_post_thumbnail( $post->ID ) ? esc_url( get_the_post_thumbnail_url( $post->ID ) ) : 'null' ?>//",
+            //    iconSize: [<?php //echo $iconSizeX . ', ' . $iconSizeY ?>//],
+            //    iconAnchor: [<?php //echo $iconAnchorX . ', ' . $iconAnchorY?>//],
+            //    popupAnchor: [0, 0],
+            //};
 
             function updateMarkerSizeX(value, noUpdate = false) {
+                let oldValue = iconData.iconSize[0];
                 iconData.iconSize[0] = parseInt(value);
-                iconData.iconAnchor[0] = Math.round(iconData.iconSize[0] * document.getElementById("fwe-marker-icon-anchor-x").value);
-                // iconData.popupAnchor[0] = Math.round(iconData.iconSize[0] * document.getElementById("fwe-marker-popup-anchor-x").value);
                 document.getElementById("fwe-marker-icon-size-x").value = value;
                 document.getElementById("fwe-marker-icon-size-x-num").value = value;
+
+                iconData.iconAnchor[0] = Math.round(iconData.iconAnchor[0] * iconData.iconSize[0] / oldValue);
+                let slider = document.getElementById("fwe-marker-icon-anchor-x");
+                slider.max = iconData.iconSize[0];
+                slider.value = iconData.iconAnchor[0];
+                let numInput = document.getElementById("fwe-marker-icon-anchor-x-num");
+                numInput.max = iconData.iconSize[0];
+                numInput.value = iconData.iconAnchor[0];
+                // iconData.popupAnchor[0] = Math.round(iconData.iconSize[0] * document.getElementById("fwe-marker-popup-anchor-x").value);
 
                 if (noUpdate) return;
 
@@ -310,11 +371,19 @@ class FantasticWorldEditor {
             }
 
             function updateMarkerSizeY(value, noUpdate = false) {
+                let oldValue = iconData.iconSize[1];
                 iconData.iconSize[1] = parseInt(value);
-                iconData.iconAnchor[1] = Math.round(iconData.iconSize[1] * document.getElementById("fwe-marker-icon-anchor-y").value);
-                // iconData.popupAnchor[1] = Math.round(iconData.iconSize[1] * document.getElementById("fwe-marker-popup-anchor-y").value);
                 document.getElementById("fwe-marker-icon-size-y").value = value;
                 document.getElementById("fwe-marker-icon-size-y-num").value = value;
+
+                iconData.iconAnchor[1] = Math.round(iconData.iconAnchor[1] * iconData.iconSize[1] / oldValue);
+                let slider = document.getElementById("fwe-marker-icon-anchor-y");
+                slider.max = iconData.iconSize[1];
+                slider.value = iconData.iconAnchor[1];
+                let numInput = document.getElementById("fwe-marker-icon-anchor-y-num");
+                numInput.max = iconData.iconSize[1];
+                numInput.value = iconData.iconAnchor[1];
+                // iconData.popupAnchor[1] = Math.round(iconData.iconSize[1] * document.getElementById("fwe-marker-popup-anchor-y").value);
 
                 if (noUpdate) return;
 
@@ -326,14 +395,14 @@ class FantasticWorldEditor {
             }
 
             function updateMarkerAnchorX(value) {
-                iconData.iconAnchor[0] = Math.round(iconData.iconSize[0] * parseFloat(value));
+                iconData.iconAnchor[0] = parseFloat(value);
                 document.getElementById("fwe-marker-icon-anchor-x").value = value;
                 document.getElementById("fwe-marker-icon-anchor-x-num").value = value;
                 updateMarker();
             }
 
             function updateMarkerAnchorY(value) {
-                iconData.iconAnchor[1] = Math.round(iconData.iconSize[1] * parseFloat(value));
+                iconData.iconAnchor[1] = parseFloat(value);
                 document.getElementById("fwe-marker-icon-anchor-y").value = value;
                 document.getElementById("fwe-marker-icon-anchor-y-num").value = value;
                 updateMarker();
@@ -391,9 +460,10 @@ class FantasticWorldEditor {
 	public function publicEnqueue() {
 		wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.8.0/dist/leaflet.css', array(), null );
 		wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.8.0/dist/leaflet.js', array(), null );
-		wp_enqueue_script( 'fantastic-world-editor', plugins_url( 'public/js/fantastic-world-editor.js', __FILE__ ), array(), null );
+		wp_enqueue_script( 'fantastic-world-editor', plugins_url( 'public/js/fantastic-world-editor.js', __FILE__ ), array( 'jquery' ), null );
 
-		$markers     = get_posts( array(
+
+		$markers      = get_posts( array(
 			'post_type'   => 'fwe-marker',
 			'numberposts' => - 1,
 		) );
@@ -407,7 +477,7 @@ class FantasticWorldEditor {
 
 		wp_add_inline_script( 'fantastic-world-editor',
 			'const FWE_DATA = ' . json_encode( array(
-				'mapUrl'      => get_option( 'fwe-map-url' ),
+				'mapUrl'       => get_option( 'fwe-map-url' ),
 				'iconsOptions' => $iconsOptions
 			) ), 'before' );
 	}
@@ -432,9 +502,12 @@ class FantasticWorldEditor {
 		return null;
 	}
 
-	public function adminEnqueue() {
+	public function adminEnqueue( $page ) {
 		$this->publicEnqueue();
 		wp_enqueue_style( 'fantastic-world-editor-admin', plugins_url( 'admin/css/fantastic-world-editor.css', __FILE__ ), array(), null );
+		if ( $page == 'post.php' ) { // #FIXME: Check if there's a more precise way to do so
+			wp_enqueue_media();
+		}
 	}
 
 	public function addAdminMenu() {
@@ -489,7 +562,7 @@ class FantasticWorldEditor {
             <div id="poststuff">
                 <div id="post-body" class="metabox-holder columns-2">
                     <div id="post-body-content" style="position: relative;">
-                        <div id="worldMap" style="height: 500px;"></div>
+                        <div id="worldMap" style="height: 800px;"></div>
                     </div>
                     <div class="postbox-container" style="float: right; margin-right: -300px; width: 280px;">
                         <div id="inspector" class="postbox">
