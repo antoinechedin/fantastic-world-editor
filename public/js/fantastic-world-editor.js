@@ -12,7 +12,11 @@ class FantasticWorldEditor {
         this.icons = {};
 
         for (const [key, iconOptions] of Object.entries(obj.iconsOptions)) {
-            this.icons[key] = L.icon(iconOptions);
+            if (iconOptions.iconUrl === undefined) {
+                this.icons[key] = L.divIcon(iconOptions);
+            } else {
+                this.icons[key] = L.icon(iconOptions);
+            }
         }
     }
 

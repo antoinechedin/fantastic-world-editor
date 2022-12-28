@@ -216,7 +216,7 @@ class FantasticWorldEditor
         $geoJson = get_post_meta($post->ID, 'fwe-geo-json', true);
         ?><label class="screen-reader-text" for="fwe-geo-json">Geo JSON</label>
         <textarea name="fwe-geo-json" id="fwe-geo-json"
-                  style="width: 100%;"><?php echo esc_attr($geoJson) ?></textarea>
+                  class="large-text code"><?php echo esc_attr($geoJson) ?></textarea>
         <?php
     }
 
@@ -512,7 +512,7 @@ class FantasticWorldEditor
         ));
         $iconsOptions = array();
         foreach ($markers as $marker) {
-            $iconOption = $this->getIconOptionsFrom($marker->ID);
+            $iconOption = json_decode($marker->post_content);
             if (!is_null($iconOption)) {
                 $iconsOptions[$marker->ID] = $iconOption;
             }
@@ -523,27 +523,6 @@ class FantasticWorldEditor
                 'mapUrl' => get_option('fwe-map-url'),
                 'iconsOptions' => $iconsOptions
             )), 'before');
-    }
-
-    private function getIconOptionsFrom($markerID)
-    {
-        $markerMeta = get_post_meta($markerID);
-
-        if (has_post_thumbnail($markerID)) {
-            return array(
-                'iconUrl' => get_the_post_thumbnail_url($markerID),
-                'iconSize' => array(
-                    floatval($markerMeta['fwe-marker-icon-size-x'][0]),
-                    floatval($markerMeta['fwe-marker-icon-size-y'][0]),
-                ),
-                'iconAnchor' => array(
-                    floatval($markerMeta['fwe-marker-icon-anchor-x'][0]),
-                    floatval($markerMeta['fwe-marker-icon-anchor-y'][0]),
-                )
-            );
-        }
-
-        return null;
     }
 
     public function adminEnqueue($page)
