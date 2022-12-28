@@ -4,133 +4,142 @@
 Plugin Name: Fantastic World Editor
 */
 
-class FantasticWorldEditor {
-	private static $instance = false;
+class FantasticWorldEditor
+{
+    private static $instance = false;
 
-	public static function getInstance() {
-		if ( ! self::$instance ) {
-			self::$instance = new self;
-		}
+    public static function getInstance()
+    {
+        if (!self::$instance) {
+            self::$instance = new self;
+        }
 
-		return self::$instance;
-	}
+        return self::$instance;
+    }
 
-	public function __construct() {
-		add_action( 'init', array( $this, 'registerCustomPosts' ) );
+    public function __construct()
+    {
+        add_action('init', array($this, 'registerCustomPosts'));
 
-		add_action( 'wp_enqueue_scripts', array( $this, 'publicEnqueue' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'adminEnqueue' ) );
+        add_action('wp_enqueue_scripts', array($this, 'publicEnqueue'));
+        add_action('admin_enqueue_scripts', array($this, 'adminEnqueue'));
 
-		add_action( 'admin_init', array( $this, 'initFWEOptions' ) );
-		add_action( 'admin_menu', array( $this, 'addAdminMenu' ) );
+        add_action('admin_init', array($this, 'initFWEOptions'));
+        add_action('admin_menu', array($this, 'addAdminMenu'));
 
-		add_action( 'add_meta_boxes', array( $this, 'addMetaBoxesAction' ) );
-		add_action( 'save_post', array( $this, 'savePostAction' ) );
+        add_action('add_meta_boxes', array($this, 'addMetaBoxesAction'));
+        add_action('save_post', array($this, 'savePostAction'));
 
-		add_action( 'wp_ajax_getAllLocationGeoJson', array( $this, 'getAllLocationGeoJson' ) );
+        add_action('wp_ajax_getAllLocationGeoJson', array($this, 'getAllLocationGeoJson'));
 
-		add_filter( 'style_loader_tag', array( $this, 'addStyleAttributes' ), 10, 2 );
-		add_filter( 'script_loader_tag', array( $this, 'addScriptAttributes' ), 10, 3 );
+        add_filter('style_loader_tag', array($this, 'addStyleAttributes'), 10, 2);
+        add_filter('script_loader_tag', array($this, 'addScriptAttributes'), 10, 3);
 
-		add_filter( 'manage_fwe-marker_posts_columns', array( $this, 'markerCustomColumns' ) );
-		add_action( 'manage_posts_custom_column', array( $this, 'renderMarkerCustomColumns' ), 10, 2 );
-	}
+        add_filter('manage_fwe-marker_posts_columns', array($this, 'markerCustomColumns'));
+        add_action('manage_posts_custom_column', array($this, 'renderMarkerCustomColumns'), 10, 2);
+    }
 
-	public function registerCustomPosts() {
-		$this->customPostLocationRegister();
-		$this->customPostMarkerRegister();
-	}
+    public function registerCustomPosts()
+    {
+        $this->customPostLocationRegister();
+        $this->customPostMarkerRegister();
+    }
 
-	private function customPostLocationRegister() {
-		register_post_type( 'fwe-location',
-			array(
-				'labels'      => array(
-					'name'          => 'Locations',
-					'singular_name' => 'Location',
-				),
-				'public'      => true,
-				'has_archive' => true,
+    private function customPostLocationRegister()
+    {
+        register_post_type('fwe-location',
+            array(
+                'labels' => array(
+                    'name' => 'Locations',
+                    'singular_name' => 'Location',
+                ),
+                'public' => true,
+                'has_archive' => true,
 //				'menu_position' => 5,
-				'taxonomies'  => array( 'post_tag' ),
-				'supports'    => array(
-					'title',
-					'editor',
-					'revision',
-					'excerpt'
-				),
-				'rewrite' => array(
-					'slug' => 'location'
-				)
-			)
-		);
-	}
+                'taxonomies' => array('post_tag'),
+                'supports' => array(
+                    'title',
+                    'editor',
+                    'revision',
+                    'excerpt'
+                ),
+                'rewrite' => array(
+                    'slug' => 'location'
+                )
+            )
+        );
+    }
 
-	private function customPostMarkerRegister() {
-		register_post_type( 'fwe-marker',
-			array(
-				'labels'             => array(
-					'name'          => 'Markers',
-					'singular_name' => 'Marker',
-				),
-				'public'             => true,
-				'has_archive'        => false,
-				'publicly_queryable' => false,
+    private function customPostMarkerRegister()
+    {
+        register_post_type('fwe-marker',
+            array(
+                'labels' => array(
+                    'name' => 'Markers',
+                    'singular_name' => 'Marker',
+                ),
+                'public' => true,
+                'has_archive' => false,
+                'publicly_queryable' => false,
 //				'menu_position' => 5,
-				'supports'           => array(
-					'title',
-					'thumbnail'
-				),
-			)
-		);
-	}
+                'supports' => array(
+                    'title',
+                    'thumbnail'
+                ),
+            )
+        );
+    }
 
-	function addMetaBoxesAction() {
-		add_meta_box(
-			'fwe-geo-json',
-			'Geo JSON',
-			array( $this, 'customPostLocationMetaBoxHTML' ),
-			'fwe-location'
-		);
+    function addMetaBoxesAction()
+    {
+        add_meta_box(
+            'fwe-geo-json',
+            'Geo JSON',
+            array($this, 'customPostLocationMetaBoxHTML'),
+            'fwe-location'
+        );
 
-		add_meta_box(
-			'fwe-location-map-settings',
-			'Map settings',
-			array( $this, 'locationMapSettingsMetaBoxHTML' ),
-			'fwe-location'
-		);
+        add_meta_box(
+            'fwe-location-map-settings',
+            'Map settings',
+            array($this, 'locationMapSettingsMetaBoxHTML'),
+            'fwe-location'
+        );
 
-		add_meta_box(
-			'fwe-marker-settings',
-			'Settings',
-			array( $this, 'markerSettingsMetaBoxHTML' ),
-			'fwe-marker'
-		);
-	}
+        add_meta_box(
+            'fwe-marker-settings',
+            'Settings',
+            array($this, 'markerSettingsMetaBoxHTML'),
+            'fwe-marker'
+        );
+    }
 
-	public function savePostAction( $post_id ) {
-		$metaKeys = array(
-			'fwe-geo-json',
-			'fwe-marker-icon-size-x',
-			'fwe-marker-icon-size-y',
-			'fwe-marker-icon-anchor-x',
-			'fwe-marker-icon-anchor-y',
-			'fwe-marker-popup-anchor-x',
-			'fwe-marker-popup-anchor-y',
-		);
+    public function savePostAction($post_id)
+    {
+        $metaKeys = array(
+            'fwe-geo-json',
+            'fwe-marker-icon-size-x',
+            'fwe-marker-icon-size-y',
+            'fwe-marker-icon-anchor-x',
+            'fwe-marker-icon-anchor-y',
+            'fwe-marker-popup-anchor-x',
+            'fwe-marker-popup-anchor-y',
+        );
 
-		foreach ( $metaKeys as $metaKey ) {
-			if ( array_key_exists( $metaKey, $_POST ) ) {
-				update_post_meta(
-					$post_id,
-					$metaKey,
-					$_POST[ $metaKey ]
-				);
-			}
-		}
-	}
+        foreach ($metaKeys as $metaKey) {
+            if (array_key_exists($metaKey, $_POST)) {
+                update_post_meta(
+                    $post_id,
+                    $metaKey,
+                    $_POST[$metaKey]
+                );
+            }
+        }
+    }
 
-	public function locationMapSettingsMetaBoxHTML( $post ) {
-		?>
+    public function locationMapSettingsMetaBoxHTML($post)
+    {
+        ?>
         <div id="map" style="height:400px;"></div>
         <script>
             var currentMarker;
@@ -153,7 +162,7 @@ class FantasticWorldEditor {
             jQuery(document).ready(function () {
                 geoJsonInputField = jQuery("textarea#fwe-geo-json")[0];
 
-                let locationGeoJson = <?php echo json_encode( get_post_meta( $post->ID, 'fwe-geo-json', true ) ) ?>;
+                let locationGeoJson = <?php echo json_encode(get_post_meta($post->ID, 'fwe-geo-json', true)) ?>;
                 try {
                     locationFeature = JSON.parse(locationGeoJson);
                 } catch (e) {
@@ -199,45 +208,49 @@ class FantasticWorldEditor {
                 map.addControl(new customControl());
             });
         </script>
-		<?php
-	}
+        <?php
+    }
 
-	function customPostLocationMetaBoxHTML( $post ) {
-		$geoJson = get_post_meta( $post->ID, 'fwe-geo-json', true );
-		?><label class="screen-reader-text" for="fwe-geo-json">Geo JSON</label>
+    function customPostLocationMetaBoxHTML($post)
+    {
+        $geoJson = get_post_meta($post->ID, 'fwe-geo-json', true);
+        ?><label class="screen-reader-text" for="fwe-geo-json">Geo JSON</label>
         <textarea name="fwe-geo-json" id="fwe-geo-json"
-                  style="width: 100%;"><?php echo esc_attr( $geoJson ) ?></textarea>
-		<?php
-	}
+                  style="width: 100%;"><?php echo esc_attr($geoJson) ?></textarea>
+        <?php
+    }
 
-	public function markerSettingsMetaBoxHTML( $post ) {
-		$iconSizeX = get_post_meta( $post->ID, 'fwe-marker-icon-size-x', true );
-		if ( empty( $iconSizeX ) ) {
-			$iconSizeX = '64';
-		}
-		$iconSizeY = get_post_meta( $post->ID, 'fwe-marker-icon-size-y', true );
-		if ( empty( $iconSizeY ) ) {
-			$iconSizeY = '64';
-		}
-		$iconAnchorX = get_post_meta( $post->ID, 'fwe-marker-icon-anchor-x', true );
-		if ( empty( $iconAnchorX ) ) {
-			$iconAnchorX = '0.5';
-		}
-		$iconAnchorY = get_post_meta( $post->ID, 'fwe-marker-icon-anchor-y', true );
-		if ( empty( $iconAnchorY ) ) {
-			$iconAnchorY = '0.5';
-		}
-		/*$popupAnchorX = get_post_meta( $post->ID, 'fwe-marker-popup-anchor-x', true );
-		if ( empty( $popupAnchorX ) ) {
-			$popupAnchorX = '0.5';
-		}
-		$popupAnchorY = get_post_meta( $post->ID, 'fwe-marker-popup-anchor-y', true );
-		if ( empty( $popupAnchorY ) ) {
-			$popupAnchorY = '0.5';
-		}*/
+    public function markerSettingsMetaBoxHTML($post)
+    {
+        // Icon size data initialisation
+        /*$iconSizeX = get_post_meta($post->ID, 'fwe-marker-icon-size-x', true);
+        if (empty($iconSizeX)) {
+            $iconSizeX = '64';
+        }
+        $iconSizeY = get_post_meta($post->ID, 'fwe-marker-icon-size-y', true);
+        if (empty($iconSizeY)) {
+            $iconSizeY = '64';
+        }
+        $iconAnchorX = get_post_meta($post->ID, 'fwe-marker-icon-anchor-x', true);
+        if (empty($iconAnchorX)) {
+            $iconAnchorX = '0.5';
+        }
+        $iconAnchorY = get_post_meta($post->ID, 'fwe-marker-icon-anchor-y', true);
+        if (empty($iconAnchorY)) {
+            $iconAnchorY = '0.5';
+        }*/
+        /*$popupAnchorX = get_post_meta( $post->ID, 'fwe-marker-popup-anchor-x', true );
+        if ( empty( $popupAnchorX ) ) {
+            $popupAnchorX = '0.5';
+        }
+        $popupAnchorY = get_post_meta( $post->ID, 'fwe-marker-popup-anchor-y', true );
+        if ( empty( $popupAnchorY ) ) {
+            $popupAnchorY = '0.5';
+        }*/
 
-		?>
-        <p><label for="fwe-marker-icon-size-x">Icon size X</label>
+        ?>
+        <!-- Icon size form-->
+        <!--<p><label for="fwe-marker-icon-size-x">Icon size X</label>
             <input id="fwe-marker-icon-size-x" class="slider" type="range" min="16" max="128" step="1">
             <input id="fwe-marker-icon-size-x-num" type="number" min="16" max="128" step="1">
         </p>
@@ -253,25 +266,29 @@ class FantasticWorldEditor {
         <p><label for="fwe-marker-icon-anchor-y">Icon anchor Y</label>
             <input id="fwe-marker-icon-anchor-y" class="slider" type="range" min="0" max="1" step="0.01">
             <input id="fwe-marker-icon-anchor-y-num" type="number" min="0" max="1" step="0.01">
-        </p>
+        </p>-->
         <p>
-            <input id="excerpt" name="excerpt" type="text">
+            <textarea id="content" class="large-text code" name="content"
+                      type="text"><?php echo esc_html($post->post_content) ?></textarea>
         </p>
 
-		<?php $image_id = '497';
-		if ( intval( $image_id ) > 0 ) {
-			// Change with the image size you want to use
-			$image = wp_get_attachment_image( $image_id, 'medium', false, array( 'id' => 'myprefix-preview-image' ) );
-		} else {
-			// Some default image
-			$image = '<img id="myprefix-preview-image" src="https://some.default.image.jpg" />';
-		}
+        <?php
+        // Image selection form
+        /*$image_id = '497';
+        if (intval($image_id) > 0) {
+            // Change with the image size you want to use
+            $image = wp_get_attachment_image($image_id, 'medium', false, array('id' => 'myprefix-preview-image'));
+        } else {
+            // Some default image
+            $image = '<img id="myprefix-preview-image" src="https://some.default.image.jpg" />';
+        }
 
-		echo $image; ?>
+        echo $image; */
+        ?><!--
         <input type="" name="myprefix_image_id" id="myprefix_image_id"
-               value="<?php echo esc_attr( $image_id ); ?>" class="regular-text"/>
-        <input type='button' class="button-primary" value="<?php esc_attr_e( 'Select a image', 'mytextdomain' ); ?>"
-               id="myprefix_media_manager"/>
+               value="<?php /*echo esc_attr($image_id); */ ?>" class="regular-text"/>
+        <input type='button' class="button-primary" value="<?php /*esc_attr_e('Select a image', 'mytextdomain'); */ ?>"
+               id="myprefix_media_manager"/>-->
 
 
         <!--<p><label for="fwe-marker-popup-anchor-x">Popup anchor X</label>
@@ -289,7 +306,8 @@ class FantasticWorldEditor {
         <div id="marker-map" style="height: 300px;"></div>
 
         <script>
-            jQuery("input#myprefix_media_manager").click(function (e) {
+            // Initialize media manager to select icon image
+            /*jQuery("input#myprefix_media_manager").click(function (e) {
                 e.preventDefault();
                 var image_frame;
                 if (image_frame) {
@@ -328,16 +346,31 @@ class FantasticWorldEditor {
                 });
 
                 image_frame.open();
-            });
+            });*/
 
             // Ajax request to refresh the image preview
-            function Refresh_Image(attachement) {
+            /*function Refresh_Image(attachement) {
                 jQuery('#myprefix-preview-image').attr("src", attachement.attributes.sizes.full.url);
+            }*/
+
+            let markerMap = FWE.createMap("marker-map");
+
+            var iconData = {};
+            var currentIcon;
+            var marker = null;
+
+            function onContentChange(e) {
+                let iconOptionsSting = e.target.value;
+                try {
+                    iconData = JSON.parse(iconOptionsSting);
+                } catch (e) {
+                }
+
+                updateMarker();
             }
 
+            jQuery("textarea#content").on("input", onContentChange).trigger("input");
 
-            const iconData = <?php echo json_encode( get_the_excerpt( $post ) ) ?>;
-            iconData.iconUrl = "<?php echo has_post_thumbnail( $post->ID ) ? esc_url( get_the_post_thumbnail_url( $post->ID ) ) : 'null' ?>";
 
             //var iconData = {
             //    iconUrl: "<?php //echo has_post_thumbnail( $post->ID ) ? esc_url( get_the_post_thumbnail_url( $post->ID ) ) : 'null' ?>//",
@@ -346,7 +379,8 @@ class FantasticWorldEditor {
             //    popupAnchor: [0, 0],
             //};
 
-            function updateMarkerSizeX(value, noUpdate = false) {
+            // Form update callbacks
+            /*function updateMarkerSizeX(value, noUpdate = false) {
                 let oldValue = iconData.iconSize[0];
                 iconData.iconSize[0] = parseInt(value);
                 document.getElementById("fwe-marker-icon-size-x").value = value;
@@ -406,7 +440,7 @@ class FantasticWorldEditor {
                 document.getElementById("fwe-marker-icon-anchor-y").value = value;
                 document.getElementById("fwe-marker-icon-anchor-y-num").value = value;
                 updateMarker();
-            }
+            }*/
 
             /*function updatePopupAnchorX(value) {
                 iconData.popupAnchor[0] = Math.round(iconData.iconSize[0] * parseFloat(value));
@@ -422,15 +456,16 @@ class FantasticWorldEditor {
                 updateMarker();
             }*/
 
-            let markerMap = FWE.createMap("marker-map");
 
-            let idCallbacks = [
+
+            // Apply form input callbacks
+            /*let idCallbacks = [
                 {id: "fwe-marker-icon-size-x", callback: updateMarkerSizeX},
                 {id: "fwe-marker-icon-size-y", callback: updateMarkerSizeY},
                 {id: "fwe-marker-icon-anchor-x", callback: updateMarkerAnchorX},
                 {id: "fwe-marker-icon-anchor-y", callback: updateMarkerAnchorY},
-                /*{id: "fwe-marker-popup-anchor-x", callback: updatePopupAnchorX},
-                {id: "fwe-marker-popup-anchor-y", callback: updatePopupAnchorY},*/
+                /!*{id: "fwe-marker-popup-anchor-x", callback: updatePopupAnchorX},
+                {id: "fwe-marker-popup-anchor-y", callback: updatePopupAnchorY},*!/
             ];
 
             idCallbacks.forEach(function (idCallback) {
@@ -443,120 +478,134 @@ class FantasticWorldEditor {
                     this.value = Math.max(Math.min(this.value, this.max), this.min);
                     idCallback.callback(this.value);
                 }
-            });
+            });*/
 
-            var currentIcon = L.icon(iconData);
-            var marker = L.marker([0.0, 0.0], {icon: currentIcon}).addTo(markerMap);
 
             function updateMarker() {
-                currentIcon = L.icon(iconData);
-                marker.setIcon(currentIcon);
+                if (iconData.iconUrl == null) {
+                    currentIcon = L.divIcon(iconData);
+                } else {
+                    currentIcon = L.icon(iconData);
+                }
+                if (marker === null) {
+                    L.marker([0.0, 0.0], {icon: currentIcon}).addTo(markerMap);
+                } else {
+                    marker.setIcon(currentIcon);
+                }
             }
 
+
         </script>
-		<?php
-	}
+        <?php
+    }
 
-	public function publicEnqueue() {
-		wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.8.0/dist/leaflet.css', array(), null );
-		wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.8.0/dist/leaflet.js', array(), null );
-		wp_enqueue_script( 'fantastic-world-editor', plugins_url( 'public/js/fantastic-world-editor.js', __FILE__ ), array( 'jquery' ), null );
+    public function publicEnqueue()
+    {
+        wp_enqueue_style('leaflet', 'https://unpkg.com/leaflet@1.8.0/dist/leaflet.css', array(), null);
+        wp_enqueue_script('leaflet', 'https://unpkg.com/leaflet@1.8.0/dist/leaflet.js', array(), null);
+        wp_enqueue_script('fantastic-world-editor', plugins_url('public/js/fantastic-world-editor.js', __FILE__), array('jquery'), null);
 
 
-		$markers      = get_posts( array(
-			'post_type'   => 'fwe-marker',
-			'numberposts' => - 1,
-		) );
-		$iconsOptions = array();
-		foreach ( $markers as $marker ) {
-			$iconOption = $this->getIconOptionsFrom( $marker->ID );
-			if ( ! is_null( $iconOption ) ) {
-				$iconsOptions[ $marker->ID ] = $iconOption;
-			}
-		}
+        $markers = get_posts(array(
+            'post_type' => 'fwe-marker',
+            'numberposts' => -1,
+        ));
+        $iconsOptions = array();
+        foreach ($markers as $marker) {
+            $iconOption = $this->getIconOptionsFrom($marker->ID);
+            if (!is_null($iconOption)) {
+                $iconsOptions[$marker->ID] = $iconOption;
+            }
+        }
 
-		wp_add_inline_script( 'fantastic-world-editor',
-			'const FWE_DATA = ' . json_encode( array(
-				'mapUrl'       => get_option( 'fwe-map-url' ),
-				'iconsOptions' => $iconsOptions
-			) ), 'before' );
-	}
+        wp_add_inline_script('fantastic-world-editor',
+            'const FWE_DATA = ' . json_encode(array(
+                'mapUrl' => get_option('fwe-map-url'),
+                'iconsOptions' => $iconsOptions
+            )), 'before');
+    }
 
-	private function getIconOptionsFrom( $markerID ) {
-		$markerMeta = get_post_meta( $markerID );
+    private function getIconOptionsFrom($markerID)
+    {
+        $markerMeta = get_post_meta($markerID);
 
-		if ( has_post_thumbnail( $markerID ) ) {
-			return array(
-				'iconUrl'    => get_the_post_thumbnail_url( $markerID ),
-				'iconSize'   => array(
-					floatval( $markerMeta['fwe-marker-icon-size-x'][0] ),
-					floatval( $markerMeta['fwe-marker-icon-size-y'][0] ),
-				),
-				'iconAnchor' => array(
-					floatval( $markerMeta['fwe-marker-icon-anchor-x'][0] ),
-					floatval( $markerMeta['fwe-marker-icon-anchor-y'][0] ),
-				)
-			);
-		}
+        if (has_post_thumbnail($markerID)) {
+            return array(
+                'iconUrl' => get_the_post_thumbnail_url($markerID),
+                'iconSize' => array(
+                    floatval($markerMeta['fwe-marker-icon-size-x'][0]),
+                    floatval($markerMeta['fwe-marker-icon-size-y'][0]),
+                ),
+                'iconAnchor' => array(
+                    floatval($markerMeta['fwe-marker-icon-anchor-x'][0]),
+                    floatval($markerMeta['fwe-marker-icon-anchor-y'][0]),
+                )
+            );
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public function adminEnqueue( $page ) {
-		$this->publicEnqueue();
-		wp_enqueue_style( 'fantastic-world-editor-admin', plugins_url( 'admin/css/fantastic-world-editor.css', __FILE__ ), array(), null );
-		if ( $page == 'post.php' ) { // #FIXME: Check if there's a more precise way to do so
-			wp_enqueue_media();
-		}
-	}
+    public function adminEnqueue($page)
+    {
+        $this->publicEnqueue();
+        wp_enqueue_style('fantastic-world-editor-admin', plugins_url('admin/css/fantastic-world-editor.css', __FILE__), array(), null);
+        if ($page == 'post.php') { // #FIXME: Check if there's a more precise way to do so (I'm using this to use the image selector in the marker post creation page
+            wp_enqueue_media();
+        }
+    }
 
-	public function addAdminMenu() {
-		add_menu_page( 'World Map', 'World Map', 'manage_options', 'fwe-world-map', array(
-			$this,
-			'worldMapMenuHTML'
-		) );
+    public function addAdminMenu()
+    {
+        add_menu_page('World Map', 'World Map', 'manage_options', 'fwe-world-map', array(
+            $this,
+            'worldMapMenuHTML'
+        ));
 
-		add_options_page(
-			'Fantastic World Editor',
-			'Fantastic World Editor',
-			'manage_options',
-			'fwe-options',
-			array( $this, 'fweOptionsHTML' )
-		);
-	}
+        add_options_page(
+            'Fantastic World Editor',
+            'Fantastic World Editor',
+            'manage_options',
+            'fwe-options',
+            array($this, 'fweOptionsHTML')
+        );
+    }
 
-	function initFWEOptions() {
-		register_setting( 'fwe-options', 'fwe-map-url' );
+    function initFWEOptions()
+    {
+        register_setting('fwe-options', 'fwe-map-url');
 
-		add_settings_section(
-			'fwe-options',
-			null,
-			null,
-			'fwe-options'
-		);
+        add_settings_section(
+            'fwe-options',
+            null,
+            null,
+            'fwe-options'
+        );
 
-		add_settings_field(
-			'fwe-map-url',
-			'Map URL',
-			array( $this, 'textWithMapFieldHTML' ),
-			'fwe-options',
-			'fwe-options'
-		);
-	}
+        add_settings_field(
+            'fwe-map-url',
+            'Map URL',
+            array($this, 'textWithMapFieldHTML'),
+            'fwe-options',
+            'fwe-options'
+        );
+    }
 
-	function textWithMapFieldHTML() {
-		$options = get_option( 'fwe-map-url' );
-		?>
+    function textWithMapFieldHTML()
+    {
+        $options = get_option('fwe-map-url');
+        ?>
         <input type="text" id="fwe-map-url" name="fwe-map-url"
-               value="<?php echo isset( $options ) ? esc_attr( $options ) : ''; ?>" class="regular-text"/>
+               value="<?php echo isset($options) ? esc_attr($options) : ''; ?>" class="regular-text"/>
         <input type="button" id="fwe-test-map-url" class="button" value="Test" onclick="testMapUrl()"/>
         <p>
         <div id="test-map-container" style="max-width: 500px; height: 200px; background-color: lightgray"></div></p>
-		<?php
-	}
+        <?php
+    }
 
-	public function worldMapMenuHTML() {
-		?>
+    public function worldMapMenuHTML()
+    {
+        ?>
         <div class="wrap">
             <h1>World Map Title</h1>
             <div id="poststuff">
@@ -599,63 +648,69 @@ class FantasticWorldEditor {
                 });
             });
         </script>
-		<?php
-	}
+        <?php
+    }
 
-	public function fweOptionsHTML() {
-		require_once "admin/partials/fwe-options.php";
-	}
+    public function fweOptionsHTML()
+    {
+        require_once "admin/partials/fwe-options.php";
+    }
 
-	public function addStyleAttributes( $html, $handle ) {
-		if ( 'leaflet' === $handle ) {
-			return str_replace( 'media="all"', 'integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin=""', $html );
-		}
+    public function addStyleAttributes($html, $handle)
+    {
+        if ('leaflet' === $handle) {
+            return str_replace('media="all"', 'integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin=""', $html);
+        }
 
-		return $html;
-	}
+        return $html;
+    }
 
-	public function addScriptAttributes( $tag, $handle, $src ) {
-		if ( 'leaflet' === $handle ) {
-			return '<script id="' . $handle . '-js" src="' . $src . '" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>' . "\n";
-		}
+    public function addScriptAttributes($tag, $handle, $src)
+    {
+        if ('leaflet' === $handle) {
+            return '<script id="' . $handle . '-js" src="' . $src . '" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>' . "\n";
+        }
 
-		return $tag;
-	}
+        return $tag;
+    }
 
-	public function getAllLocationGeoJson() {
-		$locations = get_posts( array(
-				'post_type'   => 'fwe-location',
-				'numberposts' => - 1,
-			)
-		);
+    public function getAllLocationGeoJson()
+    {
+        $locations = get_posts(array(
+                'post_type' => 'fwe-location',
+                'numberposts' => -1,
+            )
+        );
 
-		// #FIXME: this foreach loop probably won't scale with an increasing number of posts. Need to find a way to cache the data
-		$geoJson = array();
-		foreach ( $locations as $location ) {
-			$geoJson[] = get_post_meta( $location->ID, 'fwe-geo-json', true );
-		}
+        // #FIXME: this foreach loop probably won't scale with an increasing number of posts. Need to find a way to cache the data
+        $geoJson = array();
+        foreach ($locations as $location) {
+            $geoJson[] = get_post_meta($location->ID, 'fwe-geo-json', true);
+        }
 
-		wp_send_json( json_encode( $geoJson ) );
-	}
+        wp_send_json(json_encode($geoJson));
+    }
 
-	public function markerCustomColumns( $columns ) {
-		$columns = array_slice( $columns, 0, 1, true )
-		           + array( 'marker-icon' => 'Icon' )
-		           + array_slice( $columns, 1, null, true );
+    public function markerCustomColumns($columns)
+    {
+        $columns = array_slice($columns, 0, 1, true)
+            + array('marker-icon' => 'Icon')
+            + array_slice($columns, 1, null, true);
 
-		return $columns;
-	}
+        return $columns;
+    }
 
-	public function renderMarkerCustomColumns( $columnName, $postID ) {
-		if ( 'marker-icon' === $columnName ) {
-			if ( has_post_thumbnail( $postID ) ) {
-				$url = esc_url( get_the_post_thumbnail_url( $postID ) );
-				?><img src="<?php echo $url ?>" /><?php
-			} else {
-				?><img src=""/><?php
-			}
-		}
-	}
+    public function renderMarkerCustomColumns($columnName, $postID)
+    {
+        if ('marker-icon' === $columnName) {
+            if (has_post_thumbnail($postID)) {
+                $url = esc_url(get_the_post_thumbnail_url($postID));
+                ?><img src="<?php echo $url ?>" /><?php
+            } else {
+                ?><img src=""/><?php
+            }
+        }
+    }
 }
 
 $FWE_Instance = FantasticWorldEditor::getInstance();
