@@ -623,7 +623,15 @@ class FantasticWorldEditor
                         });
                     }
 
-                    L.geoJSON(geoJsonFeatures, {onEachFeature: onEachFeature}).addTo(map);
+                    function pointToLayer(feature, latlng) {
+                        if (feature.properties.iconID === undefined) {
+                            return L.marker(latlng);
+                        } else {
+                            return L.marker(latlng, {icon: FWE.icons[feature.properties.iconID]});
+                        }
+                    }
+
+                    L.geoJSON(geoJsonFeatures, {onEachFeature: onEachFeature, pointToLayer: pointToLayer}).addTo(map);
                 });
             });
         </script>
