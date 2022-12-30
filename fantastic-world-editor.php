@@ -488,7 +488,8 @@ class FantasticWorldEditor
                     currentIcon = L.icon(iconData);
                 }
                 if (marker === null) {
-                    L.marker([0.0, 0.0], {icon: currentIcon}).addTo(markerMap);
+                    marker = L.marker([0.0, 0.0], {icon: currentIcon, draggable: true});
+                    marker.addTo(markerMap);
                 } else {
                     marker.setIcon(currentIcon);
                 }
