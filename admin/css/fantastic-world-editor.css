@@ -10,3 +10,13 @@ td.marker-icon.column-marker-icon img {
 .wp-list-table tr:not(.inline-edit-row):not(.no-items) td.marker-icon.column-marker-icon::before {
     display: none;
 }
+
+/* #FIXME: We can't do this in pure CSS because it would need to get the parent margin and inverse it. Need to find something else, maybe something with an overlay instead
+.marker-debug:before {
+    content: "";
+    position: absolute;
+    border-top: 1px solid red;
+    border-left: 1px solid red;
+    width: 200%;
+    height: 200%;
+}*/

@@ -363,6 +363,11 @@ class FantasticWorldEditor
                 let iconOptionsSting = e.target.value;
                 try {
                     iconData = JSON.parse(iconOptionsSting);
+                    /*if (iconData.className === undefined || iconData.className === null) {
+                        iconData.className = "marker-debug";
+                    } else {
+                        iconData.className += " marker-debug";
+                    }*/
                 } catch (e) {
                 }
 
